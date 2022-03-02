@@ -1,0 +1,226 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <title>Tweets</title>
+    <style type="text/css">
+        body {
+            background-color: lightblue;
+        }
+    </style>
+    <link rel="stylesheet" href="stylesheets/style.css">
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0-beta/css/bootstrap.min.css"
+        integrity="sha384-/Y6pD6FV/Vv2HJnA6t+vslU6fwYXjCFtcEpHbNJ0lyAFsXTsjBbfaDjzALeQsN6M" crossorigin="anonymous">
+
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.2.1/jquery.min.js">
+    </script>
+    <script type="text/javascript">
+        $(document).ready(function () {
+            
+            //create Tweet button
+            $("#form1").submit(function (event) {
+                event.preventDefault();
+
+                $.ajax({
+                    type: 'POST',
+                    url: '/addTweet',
+                    data: $('#form1').serialize(),
+                    dataType: "json",
+                    success: function (response) {
+                        clearInputs();
+                        //$( "#a" ).click();
+                    },
+                    error: function () {
+                    }
+                })
+            });
+
+            //find Tweet button
+            $("#form2").submit(function (event) {
+                event.preventDefault();
+
+                $.ajax({
+                    type: 'GET',
+                    url: '/tweet/' + id,
+                    data: $('#form2').serialize(),
+                    dataType: "json",
+                    success: function (response) {
+                        clearInput();
+                        //$( "#a" ).click();
+                    },
+                    error: function () {
+                    }
+                })
+            });
+
+            //delete Tweet button
+            $("#form3").submit(function (event) {
+                event.preventDefault();
+
+                $.ajax({
+                    type: 'DELETE',
+                    url: '/tweet/' + id,
+                    data: $('#form3').serialize(),
+                    dataType: "json",
+                    success: function (response) {
+                        clearInput();
+                        //$( "#a" ).click();
+                    },
+                    error: function () {
+                    }
+                })
+            });
+
+            //update user data
+            $('table').on('click', '.update-button', function () {
+                //reading data from table
+                let rowEl = $(this).closest('tr');
+                let id = rowEl.find('.id').text();
+                let name = rowEl.find('.name').val();
+                let screen_name = rowEl.find('.screen_name').val();
+
+                //changing data
+                $.ajax({
+                    url: '/user/' + id,
+                    method: 'PUT',
+                    contentType: 'application/json',
+                    data: JSON.stringify({ fullname: fullname, username: username, age: age }),
+                    success: function (response) {
+                        console.log(response);
+                        $("#a").click();
+                    }
+                });
+
+            });
+
+            //show button
+            $("#a").click(function () {
+                Show();
+            });
+            function Show() {
+                $.ajax({
+                    type: 'GET',
+                    url: '/show',
+                    dataType: "json",
+                    success: function (response) {
+                        console.log(response);
+                        // let tbodyEl = $('tbody');
+                        let tbodyEl = $("#myTable > tbody")
+
+                        tbodyEl.html('');
+
+                        response.forEach(function (product) {
+                            tbodyEl.append('\
+                        <tr>\
+                        <td class="id">' + product.id + '</td>\
+                        <td><input type="text" class="name form-control" value="' + product.name + '"></td>\
+                        <td><input type="text" class="screen_name form-control" value="' + product.screen_name + '"></td>\
+                        <td>\
+                        <button class="update-button btn btn-secondary">UPDATE</button>\
+                        </td>\
+                        </tr>\
+                        ');
+                        });
+                    },
+                    error: function () {
+                    }
+                })
+            }
+            
+            //clears input fields with id and text
+            function clearInputs() {
+                $("#id").val('');
+                $("#text").val('');
+            }
+
+            //clears input fields with id
+            function clearInput() {
+                $("#id").val('');
+            }
+
+
+        });
+    </script>
+</head>
+
+<body>
+<br />
+        <h2>Create Tweet</h2>
+    <form id="form1" method="POST">
+        <table style="margin-left:auto; margin-right:auto;">
+            <tr>
+                <td><label>ID</label></td>
+                <td><input class="form-control" type="Number" name="id" id="id" required></td>
+            </tr>
+            <tr>
+                <td><label>Text</label></td>
+                <td><input class="form-control" type="text" name="text" id="text" required></td>
+            </tr>
+        </table>
+        <br />
+        <button type="Submit" id="addTweet" class="btn btn-success">Create</button>
+    </form>
+    <br />
+    <br />
+
+    <h2>Find Tweet</h2>
+<form id="form2" method="GET">
+    <table style="margin-left:auto; margin-right:auto;">
+        <tr>
+            <td><label>ID</label></td>
+            <td><input class="form-control" type="number" name="id" id="id" required></td>
+        </tr>
+    </table>
+    <table id='foundTweet' style="margin-left:auto; margin-right:auto;">
+        <thead>
+            <tr>
+                <th>CreatedAt</th>
+                <th>Text</th>
+            </tr>
+        </thead>>
+        <tbody>
+
+        </tbody>
+    </table>
+    <br />
+    <button type="Submit" id="findTweet" class="btn btn-success">Find Tweet</button>
+    <br />
+    <br />
+    <br />
+
+</form>    
+
+    <h2>Delete Tweet</h2>
+<form id="form3" method="DELETE">
+  <table style="margin-left:auto; margin-right:auto;">
+      <tr>
+          <td><label>ID</label></td>
+          <td><input class="form-control" type="number" name="id" id="id" required></td>
+      </tr>
+  </table>
+  <br />
+  <button type="Submit" id="deleteTweet" class="btn btn-success">Delete Tweet</button>
+  <br />
+  <br />
+  <br />
+
+    <h2>User List</h2>
+
+    <button id="a" class="btn btn-primary">Show Users</button>
+    <br />
+    <table id='myTable' style="margin-left:auto; margin-right:auto;">
+        <thead>
+            <tr>
+                <th>ID</th>
+                <th>Name</th>
+                <th>Screen_Name</th>
+                <th>Action</th>
+            </tr>
+        </thead>
+        <tbody>
+
+        </tbody>
+    </table>
+</body>
+
+</html>
